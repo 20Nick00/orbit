@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ detail.name if detail else 'Account type' }} · Orbit{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='charts.js').path }}" defer></script>{% endblock %}
+{% block topright %}{% if detail and detail.is_demo %}<span class="demo">Example data</span>{% endif %}{% endblock %}
+{% block content %}
+{% if notice %}<p class="empty">{{ notice }}</p>{% endif %}
+{% if detail %}
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/dashboard">Dashboard</a> / <span aria-current="page">{{ detail.name }}</span></nav>
+<div class="dhead"><div><h1>{{ detail.name }}</h1>{% if detail.blurb %}<div class="sub">{{ detail.blurb }}</div>{% endif %}</div></div>
+<div class="detail">
+  {% with chart_url='/type/' ~ detail.type_key ~ '/chart' %}{% include '_detail_hero.html' %}{% endwith %}
+  <div class="detail-aside">
+    <div class="card{% if detail.is_liability %} liab{% endif %}">
+      {% for account in detail.rows %}{% include '_account_row.html' %}{% else %}<p class="empty">No accounts of this type yet.</p>{% endfor %}
+    </div>
+    <div class="card facts">
+      <div><div class="k">Share of {{ 'liabilities' if detail.is_liability else 'assets' }}</div><div class="v num">{{ detail.share_side|pct }}</div></div>
+      <div><div class="k">Share of net worth</div><div class="v num">{{ detail.share_net_worth|pct }}</div></div>
+      <div><div class="k">Accounts</div><div class="v num">{{ detail.account_count }}</div></div>
+      <div><div class="k">1-yr change</div><div class="v num {{ detail.year_change.cls if detail.year_change else 'flat' }}">{{ detail.year_change|dTxt }}</div></div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

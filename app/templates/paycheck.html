@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Paycheck · Orbit{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='paycheck.css').path }}">
+<script src="{{ url_for('static', path='paycheck.js').path }}" defer></script>
+{% endblock %}
+{% block content %}
+<div class="dhead">
+  <div><h1>Paycheck</h1><div class="sub">Imported from paystubs. Where each gross dollar goes, and how pay turns into net worth.</div></div>
+  <div class="acts">
+    <form action="/paycheck/upload" method="post" enctype="multipart/form-data" class="pay-upload"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <label for="pay-pdf">Paystub PDF</label>
+      <input id="pay-pdf" type="file" name="file" accept="application/pdf,.pdf" required>
+      <button class="btn primary" type="submit">Import paystub</button>
+    </form>
+    <a class="btn" href="/paycheck/rules">Mapping rules</a>
+  </div>
+</div>
+{% if message %}<p role="status" class="pay-message">{{ message }}</p>{% endif %}
+{% if mailbox_enabled %}<p class="pay-muted">Mailbox: last successful month {{ mailbox.last_success_month if mailbox and mailbox.last_success_month else 'never' }}; {{ mailbox.last_saved_count if mailbox else 0 }} files saved.{% if mailbox and mailbox.last_error %} {{ mailbox.last_error }}{% endif %}</p>{% endif %}
+{% for stub in mismatches %}<p class="neg" role="note">{{ stub.employer }} · {{ stub.pay_date }}: This stub was accepted though its lines are off by {{ money(stub.reconcile_diff|abs, true) }}.</p>{% endfor %}
+{% if years %}<nav class="pay-years" aria-label="Paystub years">{% for item in years %}<a href="/paycheck?year={{ item }}" {% if item == year %}aria-current="page"{% endif %}>{{ item }}</a>{% endfor %}</nav>{% endif %}
+{% if pending %}
+<section class="card pay-attention"><div class="hd"><h2>Needs attention</h2></div><div class="bd">
+  {% for row in pending %}<div class="pay-pending">
+    <div><strong>{{ row.name }}</strong><p>{{ row.reason }}</p></div>
+    {% if row.status in ['needs_mapping', 'needs_review'] %}<a class="btn" href="/paycheck/review/{{ row.id }}">Review</a>{% endif %}
+    <form action="/paycheck/review/{{ row.id }}/dismiss" method="post"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}"><button class="btn" type="submit">Dismiss</button></form>
+  </div>{% endfor %}
+</div></section>
+{% endif %}
+{% if not latest %}
+<section class="card"><div class="bd"><h2>No paystubs{% if years %} for {{ year }}{% endif %} yet</h2><p>Drop a PDF in <code>data/inbox/paystubs/</code>, or use Import paystub above. A new employer needs a one-time mapping before its numbers appear here.</p></div></section>
+{% else %}
+<div class="grid2">
+  <div>
+    <section class="card">
+      <div class="hd"><h2>Latest paystub · {{ latest.pay_date.strftime('%b') }} {{ latest.pay_date.day }}, {{ latest.pay_date.year }}</h2><span class="eyebrow">{{ frequency or 'Pay frequency unavailable' }}</span></div>
+      <div class="bd">
+        <p class="pay-muted">{{ latest.employer }}</p>
+        <div class="stack pay" aria-label="This check, share of gross">
+          {% for segment in segments %}{% if segment.share is not none %}<i class="{% if segment.group == 'net' %}net{% endif %}" style="width:{{ [0, [100, ([segment.amount, 0]|max) / latest.gross * 100]|min]|max }}%;opacity:{{ opacities[segment.group] }}" title="{{ group_names[segment.group] }} {{ money(segment.amount, true) }}"></i>{% endif %}{% endfor %}
+        </div>
+        <div class="legend pay-legend">
+          {% for segment in segments %}<span><i style="background:var(--{{ 's1' if segment.group == 'net' else 's2' }});opacity:{{ opacities[segment.group] }}"></i>{{ group_names[segment.group] }} <b class="num">{{ money(segment.amount, true) }}</b> {{ percent(segment.share) }}</span>{% endfor %}
+        </div>
+      </div>
+      <div class="tscroll"><table>
+        <thead><tr><th>Line</th><th class="r">This check</th><th class="r">% of gross</th><th class="r">YTD</th></tr></thead>
+        <tbody>{% for row in table %}<tr class="{% if row.group == 'net' %}tot{% elif row.group == 'gross' %}pay-gross{% endif %}">
+          <td>{{ row.label }}</td><td class="r num">{{ money(row.amount, true, row.group) }}</td><td class="r num">{{ percent(row.share) }}</td><td class="r num">{{ money(row.ytd, true) }}</td>
+        </tr>{% endfor %}</tbody>
+      </table></div>
+    </section>
+    <p class="pay-source">Source: {{ source }} · Pay period: {{ latest.period_start or 'unknown' }} to {{ latest.period_end or 'unknown' }}</p>
+  </div>
+  <div>
+    <section class="card">
+      <div class="facts">
+        <div><div class="k">Gross YTD</div><div class="v num">{{ money(facts.gross_ytd) }}</div></div>
+        <div><div class="k">Effective tax rate</div><div class="v num">{{ percent(facts.effective_tax_rate) }}</div></div>
+        <div><div class="k">Federal + FICA</div><div class="v num">{{ percent(facts.federal_fica_rate) }}</div></div>
+        <div><div class="k">State + city</div><div class="v num">{{ percent(facts.state_city_rate) }}</div></div>
+        {% for label, fact in [('401(k) YTD', facts.retirement_401k), ('HSA YTD', facts.hsa)] %}
+        <div><div class="k">{{ label }}</div><div class="v num">{% if fact.ytd is none %}No line tagged{% else %}{{ money(fact.ytd) }} {% if fact.limit is not none %}<small>of {{ money(fact.limit) }}</small>{% endif %}{% endif %}</div>
+          {% if fact.limit is none %}<small>no IRS limit on file for {{ year }}</small>{% elif fact.over %}<small class="neg">over by {{ money(fact.ytd - fact.limit) }}</small>{% endif %}
+        </div>{% endfor %}
+      </div>
+      <p class="pay-limit-note">Base IRS limits. Age catch-up not included. HSA coverage: {{ 'self-only' if coverage == 'self' else 'family' }}.</p>
+    </section>
+    <section class="card pay-flow">
+      <div class="hd"><h2>Gross pay to net worth · {{ year }} YTD</h2></div>
+      <div class="bd">
+        <p class="pay-muted">Jan 1 to {{ latest.pay_date.strftime('%b') }} {{ latest.pay_date.day }}, {{ year }}</p>
+        <div class="chartwrap" id="wf"></div>
+        <script type="application/json" id="paycheck-data">{{ data | tojson }}</script>
+        <noscript><table><thead><tr><th>Step</th><th>Amount</th></tr></thead><tbody>{% for step in flow %}<tr><td>{{ step.label }}</td><td>{{ money(step.value, true) }}</td></tr>{% endfor %}</tbody></table></noscript>
+        <p class="legend pay-residual">Market and home moves are the residual: net-worth change minus what you kept.</p>
+        {% for reason in reasons %}<p class="pay-muted">{{ reason }}</p>{% endfor %}
+        {% if flow.posttax_note_amount %}<p>{{ money(flow.posttax_note_amount) }} of post-tax deductions stays in the flow, counted as money you kept.</p>{% endif %}
+        {% if unbaselined %}<p>{{ unbaselined }} account{{ 's' if unbaselined != 1 else '' }} first seen after Dec 31, {{ year - 1 }} {{ 'are' if unbaselined != 1 else 'is' }} counted from $0. Net-worth change includes {{ 'their' if unbaselined != 1 else 'its' }} opening balance.</p>{% endif %}
+        {% for warning in warnings %}<p class="neg">{{ warning }}</p>{% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+<section class="sec"><h3>Year to date, by paystub line</h3><div class="card tscroll"><table>
+  <thead><tr><th>Line</th>{% if multi_employer %}<th>Employer</th>{% endif %}<th class="r">YTD</th><th class="r">Annualized</th><th class="r">Share of gross</th></tr></thead>
+  <tbody>{% for row in ytd_rows %}<tr><td>{{ row.label }}</td>{% if multi_employer %}<td>{{ row.employer }}</td>{% endif %}<td class="r num">{{ money(row.amount, true) }}</td><td class="r num">{{ money(row.annualized, true) }}</td><td class="r num">{{ percent(row.share) }}</td></tr>{% endfor %}</tbody>
+</table></div><p class="pay-muted">Annualized at the pace through the latest pay date; this is an estimate, not a forecast.</p></section>
+{% endif %}
+{% endblock %}

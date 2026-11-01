@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Review paystub · Orbit{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', path='paycheck.css').path }}">{% endblock %}
+{% block content %}
+<div class="dhead"><div><h1>Review paystub</h1><p>{{ filename }}</p><p>{{ pending.reason }}</p></div><a href="/paycheck">Back to Paycheck</a></div>
+{% if error %}<p class="neg" role="alert">{{ error }}</p>{% endif %}
+{% if can_map %}
+<form method="post" action="/paycheck/review/{{ pending.id }}" class="card pay-review"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+  <div class="bd pay-fields">
+    <label>Employer<input name="employer" value="{{ values.employer }}" required maxlength="200"></label>
+    <label>Text that identifies this employer<input name="match_text" value="{{ values.match_text }}" required minlength="4" maxlength="500"><small>Text printed only on this employer's stubs, usually the company name.</small></label>
+    <label>Pay date<input type="date" name="pay_date" value="{{ values.pay_date }}" required></label>
+    <label>Period start<input type="date" name="period_start" value="{{ values.period_start }}"></label>
+    <label>Period end<input type="date" name="period_end" value="{{ values.period_end }}"></label>
+  </div>
+  {% include "paycheck_mapping_fields.html" %}
+  <div class="bd">
+    <p id="pay-reconcile" role="status">The server checks that gross minus deductions equals net pay.</p>
+    {% if mismatch %}<label class="pay-accept"><input type="checkbox" name="accept_mismatch"> Accept anyway — keep this difference visible on the Paycheck page</label>{% endif %}
+    <button class="btn primary" type="submit">Save mapping and import</button>
+  </div>
+</form>
+<script type="application/json" id="pay-review-data">{{ data | tojson }}</script>
+<script>
+(() => {
+  const amounts = JSON.parse(document.getElementById('pay-review-data').textContent);
+  const groups = [...document.querySelectorAll('.pay-group')];
+  const status = document.getElementById('pay-reconcile');
+  function check() {
+    let gross = null, net = null, deductions = 0, missing = false;
+    const deductionGroups = ['tax', 'pretax', 'posttax', 'benefit'];
+    let sample = groups.flatMap((select, i) => select.value === 'tax' && Number(amounts[i]) ? [Number(amounts[i])] : []);
+    if (!sample.length) sample = groups.flatMap((select, i) => deductionGroups.includes(select.value) && Number(amounts[i]) ? [Number(amounts[i])] : []);
+    const sign = sample.filter(value => value < 0).length > sample.length / 2 ? -1 : 1;
+    groups.forEach((select, i) => {
+      const group = select.value;
+      if (!group || (amounts[i] === null && group !== 'ignore')) { missing = true; return; }
+      const amount = Number(amounts[i]);
+      if (group === 'gross') gross = (gross ?? 0) + amount;
+      else if (group === 'net') net = (net ?? 0) + amount;
+      else if (deductionGroups.includes(group)) deductions += amount * sign;
+    });
+    if (missing || gross === null || net === null) {
+      status.textContent = 'Choose every group, including gross total and net pay, to check the totals.';
+      return;
+    }
+    const difference = Math.abs(gross - deductions - net);
+    status.textContent = difference <= 0.020001 ? 'Adds up' : 'Off by ' + difference.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+  }
+  groups.forEach(select => select.addEventListener('change', check));
+  check();
+})();
+</script>
+{% endif %}
+<form method="post" action="/paycheck/review/{{ pending.id }}/dismiss" class="pay-dismiss"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}"><button class="btn" type="submit">Dismiss and keep file</button></form>
+{% endblock %}

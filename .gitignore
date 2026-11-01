@@ -1,0 +1,21 @@
+data/
+*.sqlite
+*.sqlite-*
+.env
+.env.*
+!.env.example
+__pycache__/
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+node_modules/
+.DS_Store
+Thumbs.db
+# Employer rules name your employer; publish.bat pushes to a public repo.
+paystubs/rules/*
+!paystubs/rules/example.yaml
+.claude/
+# Desktop shortcuts hold local folder paths.
+*.url

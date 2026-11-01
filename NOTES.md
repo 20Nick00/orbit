@@ -1,0 +1,68 @@
+# Notes
+
+- 2026-10-31 Decision: a closed month's figure for an account with no month-end row is computed when read, from its latest daily balance, instead of inserting a permanent row, because a review showed inserted rows froze first guesses that later or corrected files then couldn't fix.
+- 2026-10-31 Decision: the month-end job doesn't freeze a CSV or OFX balance dated before the month's last day, even if later balances exist, because files arrive out of order; a person clicking Close month freezes every account.
+- 2026-10-31 Decision: a month containing a CSV or OFX balance counts as closed in reports without any row, unless it was reopened, because bank files rarely have a balance dated on the last day and an all-file user would otherwise see blank months forever.
+- 2026-10-31 Decision: the CSRF cookie is SameSite=Lax with a one-year life, not Strict, because Strict replaced the token whenever someone arrived by a link and broke their open tabs; POSTs still need a matching Origin and token.
+- 2026-10-31 Decision: the CSRF Origin check compares host and port only, because behind `tailscale serve` the app sees plain HTTP and comparing schemes rejected every form.
+- 2026-10-31 Decision: the service worker uses the network first and its installed copies only offline, because cache-first kept old JS and CSS after every update.
+- 2026-10-31 Decision: backups keep the newest N files rather than a date window, so a long shutdown or clock jump can't delete them all.
+- 2026-10-31 Decision: the public repo starts from one clean commit, so development history stays out of it.
+- 2026-10-31 Lesson: Codex's sandbox on this PC can't start Python, so it can't run pytest; anything it builds here must be tested outside it before being trusted.
+- 2026-10-31 Fact: the `/docs` page the README links to as the live app docs is FastAPI's built-in API page, which loads its viewer from a CDN when opened; Orbit's other pages call no outside hosts.
+- 2026-10-31 Fact: the bank CSV test files copy real column layouts from memory with fake values, not real exports, so the first real file from a bank may still need a tweak.
+- 2026-10-31 Decision: file imports don't implement the `Aggregator` protocol, because it describes linking and syncing a live connection and an upload has neither.
+- 2026-10-31 Decision: a file transaction's `external_id` is the hash of account, date, amount and memo plus its occurrence within the file, so two identical coffees in one file stay two while re-imports and overlapping files add nothing.
+- 2026-10-31 Decision: a file with no column headings always shows the mapping form, pre-filled from the saved rule, because "Column 1, Column 2" can't identify which bank it came from.
+- 2026-10-31 Decision: the card "charges outnumber payments" sign guess applies only to credit cards; other debts and unclear files ask, because a wrong sign silently corrupts spending and net worth.
+- 2026-10-31 Decision: file imports never overwrite manual or edited balances, any day in a month where this account has a month-end row, or any day a later month-end row was based on, and they report the count of days skipped.
+- 2026-10-31 Lesson: this FastAPI version nests included routers, so `app.routes` doesn't list their paths; don't use it to check whether a page exists.
+- 2026-10-31 Lesson: ofxparse 0.21 substitutes zero for absent investment values and shifts timezone-tagged dates; file import must preserve missing values and the bank's printed calendar date to avoid false balances and duplicate transactions.
+- 2026-10-31 Decision: reconnects replace legacy Plaid transactions one for one by account, date and amount at or below a saved ID watermark, preserving older history and identical purchases across partial pulls.
+- 2026-10-31 Decision: newly connected non-USD accounts stay hidden because totals cannot mix currencies; they still sync for reference.
+- 2026-10-31 Decision: optional Plaid webhooks use a separate listener in the same process so item locks are shared; point public tunnels only at ORBIT_WEBHOOK_PORT because Host headers cannot protect the main app, which has no login.
+- 2026-10-31 Decision: Mark closed records a zero balance today and keeps past net worth; Hide excludes the account from all past totals, so use Mark closed for genuinely closed accounts.
+
+- 2026-10-31 Decision: Plaid sync uses process-local item locks and a local scheduler, so run one Orbit server process to avoid duplicate jobs and conflicting syncs.
+
+- 2026-10-31 Decision: `contributions` counts only paycheck retirement and HSA money and employer match, never bank-to-brokerage transfers, because transfers are already in `kept` and counting them twice creates a false market loss.
+- 2026-10-31 Decision: `market_gain` is NW change − new accounts − contributions − kept. `new_accounts` adds to Nick's formula because a newly added account's opening balance isn't a gain; it is zero in months with no new account.
+- 2026-10-31 Decision: the month-end job skips a month with no balance dated inside it, so a gap stays blank instead of freezing guessed rows that can't be changed; within a closed month an account not updated that month still carries forward.
+- 2026-10-31 Decision: the RentCast ceiling is 45 requests per trailing 31 days per database (hard maximum 50), because extra requests cost $0.20 each and the billing period may start on the signup date. Don't share one key across installs.
+- 2026-10-31 Decision: a property counts as overridden when its latest balance isn't from RentCast and it has a valuation row, so manual edits from any page hold until an explicit refresh; the first hand-entered balance doesn't block automation.
+- 2026-10-31 Lesson: passing tests didn't show the Trends charts had stopped drawing after the dashboard merge changed how `charts.js` exposes `barChart`; check chart pages in a real browser after any merge.
+- 2026-10-31 Fact: Almanac on about 14,000 transactions and 10,000 balance rows, this PC: about 270 ms, down from 3.7 s, with unchanged yearly figures.
+- 2026-10-31 Lesson: record_daily can overwrite a manual correction without a balance_edits row; importers and the nightly job (sessions 2 and 3) must decide how to treat source="manual" rows.
+- 2026-10-31 Fact: the Close button uses the server's date, so a UTC server offers it hours early for New York; Docker should set a timezone.
+- 2026-10-31 Decision: reopening covers every account in a month because close_month skips a month once any month-end rows exist; reopen then close rebuilds the whole month consistently.
+- 2026-10-31 Decision: SQLite triggers require an exact archived copy under an open reopen before deleting a month-end balance; they reject audit deletes and replacements, updates to balance edits, archives and finished reopens, and archive inserts without an open parent. This stops accidents and ordinary SQL, but someone with raw database access could still insert an open reopen row.
+- 2026-10-31 Decision: liability detail deltas show the effect on net worth, so paying down debt is positive while balance and history show the amount owed.
+- 2026-10-31 Decision: reopening has no admin role because Orbit is single-user; the Admin section requires typing the month to confirm the action across all accounts.
+- 2026-10-31 Decision: balance-history POSTs check Origin and Sec-Fetch-Site as an interim browser safeguard until a login exists.
+- 2026-10-31 Lesson: parallel branches each picked the next migration number, and a repeated id stops the app starting; whoever lands second renumbers, so check `alembic heads` shows one head after every merge.
+- 2026-10-31 Decision: dashboard totals are missing when a visible member has no recorded balance, because partial totals could look complete; an empty side is zero. Shared home-equity liability links are counted once to avoid subtracting one mortgage twice.
+- 2026-10-31 Decision: demo account and merchant definitions live in `core/demo_data.json`, copied directly from the prototype, so the demo runs without reading the design document; Python retains its random-call order.
+- 2026-10-31 Decision: dashboard YTD is measured from Dec 31, not Jan 1 as the prototype's dashboard does, because the prototype's Almanac and paycheck waterfall already use Dec 31 and the two should agree.
+- 2026-10-31 Decision: a share is a fraction of the side's gross size, not its net total, so an overdrawn or overpaid account can't produce 111% or 0%. A change from a zero balance has no percentage but still shows its dollar change and sign.
+- 2026-10-31 Decision: the dashboard cache is emptied by SQLite triggers, so importers can't leave it stale; the rebuild takes `BEGIN IMMEDIATE` before reading, because a sync committing mid-rebuild would otherwise leave wrong figures cached all day.
+- 2026-10-31 Decision: the demo does not close months, because closed months can't be deleted by design and re-running `make demo` must not bypass that.
+- 2026-10-31 Lesson: the Codex sandbox can't start the project's Python, so its web code arrives unrun; its first dashboard had a template error that failed every page. Run tests outside the sandbox before trusting it.
+- 2026-10-31 Fact: dashboard on 10,000 transactions, this PC, headless Edge: first paint 36 ms cold and 24 ms warm; first request after a data change 62 ms median, 100 ms worst. At 4x slower CPU, measured before the review fixes, cold first paint was 244 ms and warm 140 ms.
+- 2026-10-31 Idea: `spark` is in `charts.js` but no dashboard row uses it, because the session 4 spec doesn't list a sparkline; the research recommends per-row sparklines if wanted later.
+- 2026-10-31 Fact: the paystub parser has only been tested on two synthetic PDF layouts, so the first real stub may need a tweak.
+- 2026-10-31 Fact: file imports may leave `transactions.category` empty, so transfers or income among them distort Spending; the Paycheck page shows a count of those rows rather than guessing.
+- 2026-10-31 Decision: `transactions.amount` is negative for money out, agreed with the Plaid and file-import sessions, because the Paycheck waterfall's Spending depends on it.
+- 2026-10-31 Decision: once a month has month-end rows, `close_month` adds nothing more, because the plan says month-ends are never rewritten; a late account is counted when read, and a correction to an existing row needs an explicit reopen (session 5), then a re-close.
+- 2026-10-31 Decision: `net_worth_series` carries an account's last known balance forward across days with no row and leaves out hidden accounts, so totals don't dip on missed syncs and always match the accounts on screen. Hidden accounts still get month-end rows, so unhiding one restores its history.
+- 2026-10-31 Decision: a negative balance on a liability means overpaid and raises net worth, so importers (session 3) must convert files that show debts as negative numbers before calling `record_daily`.
+- 2026-10-31 Decision: unknown account types fall back to `other`, which counts as an asset unless `is_liability` is set, because guessing could move money to the wrong side; the database rejects any other type whose flag disagrees with it.
+- 2026-10-31 Lesson: the session 8 month-end job must pass the owner's local date to `close_month`, because a server on UTC would otherwise close a month hours early and freeze a stale balance for good.
+- 2026-10-31 Fact: net worth is computed only from balances and never reads transactions, so transfer detection (session 8) affects income and spending, not net worth.
+- 2026-10-31 Decision: `app/static/orbit.css` holds the whole Keel stylesheet from the prototype, not just tokens and base rules, so the parallel page sessions don't each paste CSS into one file and conflict.
+- 2026-10-31 Decision: the base layout loads htmx and Manrope from `app/static/vendor/`, not a CDN or Google Fonts, because a private finance app shouldn't call outside hosts on every page load.
+- 2026-10-31 Decision: Docker Compose binds to 127.0.0.1 by default because there is no login yet; change `ORBIT_BIND` only once there is, or to a Tailscale address.
+- 2026-10-31 Fact: BUILD_PLAN.md says this folder is already a Git repo pushed to github.com/20Nick00/orbit; it was not. Git was set up locally on this date, and Nick chose a private `20Nick00/orbit` for automatic backup, so the public prototype link stays off until he makes it public at launch.
+- 2026-10-31 Fact: all the BUILD_PLAN sessions were started in parallel on 2026-10-31, so they sit on separate branches and worktrees until merged.
+- 2026-10-31 Decision: Paystubs reuses `core/` and `app/` from the scaffold and core-model sessions rather than defining its own tables, so there is one definition of each table.
+- 2026-10-31 Decision: `publish.bat` now checks for a GitHub link (`origin`) instead of a `.git` folder, because local Git would otherwise have stopped it from ever creating the repo.
+- 2026-10-31 Decision: Live employer rules default to `data/paystubs/rules/`, not `paystubs/rules/` as the plan says, because the Docker image can't write there and rebuilds would lose them, and `publish.bat` would otherwise risk publishing employer names.

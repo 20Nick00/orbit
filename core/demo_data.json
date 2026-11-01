@@ -1,0 +1,573 @@
+{
+  "accounts": [
+    {
+      "id": "chk",
+      "name": "Total Checking",
+      "inst": "Chase",
+      "type": "cash",
+      "bal": 8420,
+      "vol": 0.004,
+      "drift": 0.0001,
+      "sub": "Checking ••1001",
+      "facts": [
+        [
+          "Interest",
+          "0.01% APY"
+        ],
+        [
+          "Avg. balance, 90d",
+          "$9,140"
+        ],
+        [
+          "Inflows, 30d",
+          "+$11,780"
+        ],
+        [
+          "Outflows, 30d",
+          "−$10,920"
+        ]
+      ]
+    },
+    {
+      "id": "sav",
+      "name": "Online Savings",
+      "inst": "Ally",
+      "type": "cash",
+      "bal": 31200,
+      "vol": 0.0008,
+      "drift": 0.0006,
+      "sub": "Savings ••1002",
+      "facts": [
+        [
+          "Interest",
+          "3.85% APY"
+        ],
+        [
+          "Interest YTD",
+          "$987"
+        ],
+        [
+          "Months of expenses",
+          "3.6"
+        ],
+        [
+          "Last transfer in",
+          "$1,500 · Oct 2"
+        ]
+      ]
+    },
+    {
+      "id": "brk",
+      "name": "Brokerage",
+      "inst": "Fidelity",
+      "type": "invest",
+      "bal": 142600,
+      "vol": 0.009,
+      "drift": 0.0006,
+      "sub": "Individual ••1003",
+      "facts": [
+        [
+          "Cost basis",
+          "$118,300"
+        ],
+        [
+          "Unrealized gain",
+          "+$24,300"
+        ],
+        [
+          "Dividends YTD",
+          "$2,140"
+        ],
+        [
+          "Contributions YTD",
+          "$20,000"
+        ]
+      ],
+      "holdings": [
+        [
+          "VTI",
+          "Vanguard Total Market",
+          58.2
+        ],
+        [
+          "VXUS",
+          "Vanguard Intl",
+          17.4
+        ],
+        [
+          "BND",
+          "Vanguard Total Bond",
+          9.1
+        ],
+        [
+          "AAPL",
+          "Apple",
+          8.6
+        ],
+        [
+          "Cash",
+          "SPAXX",
+          6.7
+        ]
+      ]
+    },
+    {
+      "id": "401",
+      "name": "401(k)",
+      "inst": "Fidelity",
+      "type": "retire",
+      "bal": 96300,
+      "vol": 0.008,
+      "drift": 0.0009,
+      "sub": "Employer plan ••1004",
+      "facts": [
+        [
+          "Contribution",
+          "10% + 4% match"
+        ],
+        [
+          "Contributions YTD",
+          "$19,560"
+        ],
+        [
+          "Vested",
+          "100%"
+        ],
+        [
+          "Expense ratio",
+          "0.04%"
+        ]
+      ],
+      "holdings": [
+        [
+          "FXAIX",
+          "Fidelity 500 Index",
+          70
+        ],
+        [
+          "FSPSX",
+          "Intl Index",
+          20
+        ],
+        [
+          "FXNAX",
+          "US Bond Index",
+          10
+        ]
+      ]
+    },
+    {
+      "id": "ira",
+      "name": "Roth IRA",
+      "inst": "Schwab",
+      "type": "retire",
+      "bal": 48900,
+      "vol": 0.009,
+      "drift": 0.0006,
+      "sub": "Retirement ••1005",
+      "facts": [
+        [
+          "2026 contribution",
+          "$7,000 of $7,000"
+        ],
+        [
+          "Basis (withdrawable)",
+          "$31,000"
+        ],
+        [
+          "Growth",
+          "+$17,900"
+        ],
+        [
+          "Holdings",
+          "SWTSX, SWISX"
+        ]
+      ]
+    },
+    {
+      "id": "hsa",
+      "name": "HSA",
+      "inst": "Fidelity",
+      "type": "health",
+      "bal": 7800,
+      "vol": 0.006,
+      "drift": 0.0007,
+      "sub": "Health savings ••1006",
+      "facts": [
+        [
+          "2026 contribution",
+          "$3,900 of $4,400"
+        ],
+        [
+          "Invested",
+          "$6,900 (88%)"
+        ],
+        [
+          "Cash buffer",
+          "$900"
+        ],
+        [
+          "Receipts saved",
+          "$1,240 unreimbursed"
+        ]
+      ]
+    },
+    {
+      "id": "wl",
+      "name": "Whole life · cash value",
+      "inst": "Example Life",
+      "type": "insure",
+      "bal": 4200,
+      "vol": 0,
+      "drift": 0.0004,
+      "sub": "Policy ••1007",
+      "facts": [
+        [
+          "Death benefit",
+          "$500,000"
+        ],
+        [
+          "Premium",
+          "$185 / mo"
+        ],
+        [
+          "Dividend rate",
+          "5.0%"
+        ],
+        [
+          "Loan available",
+          "$3,900"
+        ]
+      ]
+    },
+    {
+      "id": "cb",
+      "name": "Coinbase",
+      "inst": "Coinbase",
+      "type": "crypto",
+      "bal": 12400,
+      "vol": 0.03,
+      "drift": 0.0004,
+      "sub": "Exchange wallet",
+      "facts": [
+        [
+          "BTC",
+          "0.082 · $9,100"
+        ],
+        [
+          "ETH",
+          "1.21 · $3,300"
+        ],
+        [
+          "Cost basis",
+          "$8,600"
+        ],
+        [
+          "Staking rewards YTD",
+          "$74"
+        ]
+      ]
+    },
+    {
+      "id": "pm",
+      "name": "Crypto wallet",
+      "inst": "Example Exchange",
+      "type": "crypto",
+      "bal": 8200,
+      "vol": 0.02,
+      "drift": 0.001,
+      "sub": "USDC",
+      "facts": [
+        ["Asset", "USDC"],
+        ["Balance", "$8,200"],
+        ["Storage", "Example wallet"],
+        ["Source", "Manual entry"]
+      ]
+    },
+    {
+      "id": "home",
+      "name": "Condo · 2BR",
+      "inst": "Estimate",
+      "type": "property",
+      "bal": 685000,
+      "vol": 0,
+      "drift": 0.00012,
+      "step": 30,
+      "sub": "Example City · est. value",
+      "facts": [
+        [
+          "Purchase price",
+          "$640,000 · 2024"
+        ],
+        [
+          "Equity",
+          "$173,000 (25%)"
+        ],
+        [
+          "Est. source",
+          "Avg of 3 estimates"
+        ],
+        [
+          "HOA",
+          "$640 / mo"
+        ]
+      ]
+    },
+    {
+      "id": "amx",
+      "name": "Gold Card",
+      "inst": "Amex",
+      "type": "cards",
+      "bal": -2340,
+      "vol": 0.05,
+      "drift": 0,
+      "sub": "Credit ••1008 · due Nov 14",
+      "facts": [
+        [
+          "Statement balance",
+          "$2,340"
+        ],
+        [
+          "Due",
+          "Nov 14 · autopay"
+        ],
+        [
+          "Credit limit",
+          "$25,000"
+        ],
+        [
+          "Utilization",
+          "9%"
+        ]
+      ]
+    },
+    {
+      "id": "csr",
+      "name": "Sapphire Reserve",
+      "inst": "Chase",
+      "type": "cards",
+      "bal": -1180,
+      "vol": 0.06,
+      "drift": 0,
+      "sub": "Credit ••1009 · due Nov 21",
+      "facts": [
+        [
+          "Statement balance",
+          "$1,180"
+        ],
+        [
+          "Due",
+          "Nov 21 · autopay"
+        ],
+        [
+          "Credit limit",
+          "$30,000"
+        ],
+        [
+          "Utilization",
+          "4%"
+        ]
+      ]
+    },
+    {
+      "id": "ploan",
+      "name": "Personal loan",
+      "inst": "Example Lender",
+      "type": "loans",
+      "bal": -6400,
+      "vol": 0,
+      "drift": -0.0016,
+      "sub": "7.9% fixed · $310/mo",
+      "facts": [
+        [
+          "Rate",
+          "7.9% fixed"
+        ],
+        [
+          "Payment",
+          "$310 / mo"
+        ],
+        [
+          "Payoff",
+          "Aug 2028"
+        ],
+        [
+          "Interest YTD",
+          "$612"
+        ]
+      ]
+    },
+    {
+      "id": "stu",
+      "name": "Student loan",
+      "inst": "Example Servicer",
+      "type": "loans",
+      "bal": -18600,
+      "vol": 0,
+      "drift": -0.0012,
+      "sub": "4.9% fixed · $412/mo",
+      "facts": [
+        [
+          "Rate",
+          "4.9% fixed"
+        ],
+        [
+          "Payment",
+          "$412 / mo"
+        ],
+        [
+          "Payoff",
+          "Mar 2031"
+        ],
+        [
+          "Interest YTD",
+          "$921"
+        ]
+      ]
+    },
+    {
+      "id": "mtg",
+      "name": "Mortgage",
+      "inst": "Example Home Loans",
+      "type": "mortgage",
+      "bal": -512000,
+      "vol": 0,
+      "drift": -0.00012,
+      "sub": "6.1% · 30-yr fixed · $3,105/mo",
+      "facts": [
+        [
+          "Rate",
+          "6.10% fixed"
+        ],
+        [
+          "Payment",
+          "$3,105 / mo (P&I)"
+        ],
+        [
+          "Principal YTD",
+          "$6,120"
+        ],
+        [
+          "Interest YTD",
+          "$31,240"
+        ]
+      ]
+    }
+  ],
+  "merchants": [
+    [
+      "Trader Joe's",
+      "Groceries",
+      38,
+      90
+    ],
+    [
+      "Whole Foods",
+      "Groceries",
+      45,
+      120
+    ],
+    [
+      "Sweetgreen",
+      "Dining",
+      14,
+      22
+    ],
+    [
+      "Joe & the Juice",
+      "Dining",
+      8,
+      14
+    ],
+    [
+      "Uber",
+      "Transport",
+      12,
+      38
+    ],
+    [
+      "Transit",
+      "Transport",
+      2.9,
+      2.9
+    ],
+    [
+      "Amazon",
+      "Shopping",
+      18,
+      140
+    ],
+    [
+      "Equinox",
+      "Health",
+      260,
+      260
+    ],
+    [
+      "Con Edison",
+      "Utilities",
+      70,
+      130
+    ],
+    [
+      "Verizon",
+      "Utilities",
+      85,
+      85
+    ],
+    [
+      "Netflix",
+      "Subscriptions",
+      15.49,
+      15.49
+    ],
+    [
+      "Spotify",
+      "Subscriptions",
+      11.99,
+      11.99
+    ],
+    [
+      "Bloomberg",
+      "Subscriptions",
+      35,
+      35
+    ],
+    [
+      "Delta",
+      "Travel",
+      180,
+      520
+    ],
+    [
+      "Airbnb",
+      "Travel",
+      240,
+      680
+    ],
+    [
+      "Lucali",
+      "Dining",
+      60,
+      95
+    ],
+    [
+      "Blue Bottle",
+      "Dining",
+      6,
+      9
+    ],
+    [
+      "Citarella",
+      "Groceries",
+      30,
+      70
+    ],
+    [
+      "Zara",
+      "Shopping",
+      40,
+      160
+    ]
+  ]
+}

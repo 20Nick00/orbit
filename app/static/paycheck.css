@@ -1,0 +1,33 @@
+/* Without this, nowrap tables widen the grid column past the screen and body clips it. */
+.grid2 > * { min-width: 0; }
+.pay-upload, .pay-pending, .pay-years { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pay-upload input { max-width: 220px; }
+.pay-attention, .pay-years, .pay-message { margin-bottom: 20px; }
+.pay-pending { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.pay-pending > div { flex: 1; min-width: 180px; overflow-wrap: anywhere; }
+.pay-pending p { margin: 6px 0; }
+.pay-legend { margin-top: 10px; }
+.pay-legend b { font-weight: 600; }
+.pay-source, .pay-muted, .pay-limit-note, .pay-help { color: var(--fg-3); font-size: 12px; }
+.pay-source { overflow-wrap: anywhere; margin-top: 12px; }
+.pay-gross { font-weight: 700; }
+.pay-limit-note { margin: 0; padding: 0 20px 16px; }
+.pay-flow { margin-top: 20px; }
+.pay-residual { margin: 10px 0 0; color: var(--fg-3); }
+.pay-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.pay-fields label { display: grid; gap: 6px; }
+.pay-review input:not([type=checkbox]), .pay-review select {
+  border: 1px solid var(--line-strong); border-radius: 4px; padding: 8px;
+  background: var(--bg); color: var(--fg); font: inherit; min-width: 0;
+}
+.pay-review select { max-width: 190px; }
+.pay-help { padding: 0 20px; }
+.pay-accept { display: block; margin-bottom: 16px; }
+.pay-dismiss { margin-top: 20px; }
+.pay-years [aria-current=page] { font-weight: 700; text-decoration: underline; }
+#wf svg { width: 100%; min-width: 540px; display: block; }
+#wf { overflow-x: auto; }
+@media (max-width: 640px) {
+  .pay-fields { grid-template-columns: 1fr; }
+  .pay-upload { align-items: flex-start; }
+}

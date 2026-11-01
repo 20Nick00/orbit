@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "orbit"
+version = "0.1.0"
+description = "Open-source, self-hosted wealth tracker. Everything orbits your net worth."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+dynamic = ["dependencies"]
+
+# Orbit runs from the source tree, so only its dependencies get installed.
+[tool.setuptools]
+packages = []
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
+markers = ["plaid_sandbox: opt-in integration tests against Plaid Sandbox"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["docs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

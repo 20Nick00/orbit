@@ -1,0 +1,23 @@
+# 401(k): IRS Notice 2025-67 and IRS retirement-plan COLA table.
+# 2026 HSA: IRS Rev. Proc. 2025-19 (earlier years: 2023-23 and 2024-25).
+2024:
+  deferral_401k: 23000
+  catchup_50: 7500
+  catchup_60_63: null
+  hsa_self: 4150
+  hsa_family: 8300
+  hsa_catchup_55: 1000
+2025:
+  deferral_401k: 23500
+  catchup_50: 7500
+  catchup_60_63: 11250
+  hsa_self: 4300
+  hsa_family: 8550
+  hsa_catchup_55: 1000
+2026:
+  deferral_401k: 24500
+  catchup_50: 8000
+  catchup_60_63: 11250
+  hsa_self: 4400
+  hsa_family: 8750
+  hsa_catchup_55: 1000

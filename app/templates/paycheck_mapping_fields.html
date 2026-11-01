@@ -1,0 +1,14 @@
+<div class="tscroll"><table>
+  <thead><tr><th>Label</th>{% if not editing %}<th class="r">This check</th><th class="r">YTD</th>{% endif %}<th>Group</th><th>Limit</th></tr></thead>
+  <tbody>{% for row in rows %}{% set index = loop.index0 %}<tr>
+    <td>{{ row.label }}<input type="hidden" name="label_{{ index }}" value="{{ row.label }}"></td>
+    {% if not editing %}<td class="r num">{{ money(row.amount, true) }}</td><td class="r num">{{ money(row.ytd, true) }}</td>{% endif %}
+    <td><select name="group_{{ index }}" aria-label="Group for {{ row.label }}" required class="pay-group"><option value="">Choose a group</option>{% for value, label in groups %}<option value="{{ value }}" {% if row.group == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></td>
+    <td><select name="limit_{{ index }}" aria-label="Limit for {{ row.label }}"><option value="">None</option><option value="401k" {% if row.limit == '401k' %}selected{% endif %}>401(k)</option><option value="hsa" {% if row.limit == 'hsa' %}selected{% endif %}>HSA</option></select></td>
+  </tr>{% endfor %}</tbody>
+</table></div>
+<div class="pay-help">
+  <p>Pre-tax savings: money going into accounts you own (401(k), HSA). Benefit: money paid to a provider (medical, FSA, commuter).</p>
+  <p>Employer contribution: money your employer adds to accounts you own (match, HSA). Ignore employer-paid premiums.</p>
+  <p>Ignore hours, rates, earnings detail and subtotals. Use Gross total and Net pay only for the final totals.</p>
+</div>

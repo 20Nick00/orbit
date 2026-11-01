@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{{ detail.name if detail else 'Account' }} · Orbit{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='charts.js').path }}" defer></script>{% endblock %}
+{% block topright %}{% if detail and detail.is_demo %}<span class="demo">Example data</span>{% endif %}{% endblock %}
+{% block content %}
+{% if notice %}<p class="empty">{{ notice }}</p>{% endif %}
+{% if detail %}
+{% set account = detail.account %}
+{% set history = detail.history %}
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/dashboard">Dashboard</a> / <a href="/type/{{ account.type }}">{{ detail.type_name }}</a> / <span aria-current="page">{{ account.name }}</span></nav>
+<div class="dhead"><div><h1>{{ account.name }}</h1><div class="sub">{{ detail.institution or '—' }}{% if detail.subtitle %} · {{ detail.subtitle }}{% endif %}</div></div>{% if detail.can_edit %}<a class="btn" href="/account/{{ account.id }}/manual">Edit</a>{% endif %}</div>
+<div class="detail">
+  {% with chart_url='/account/' ~ account.id ~ '/chart' %}{% include '_detail_hero.html' %}{% endwith %}
+  <div class="detail-aside">
+    <div class="card facts">
+      <div><div class="k">Share of {{ 'liabilities' if account.is_liability else 'assets' }}</div><div class="v num">{{ detail.share_side|pct }}</div></div>
+      <div><div class="k">Share of net worth</div><div class="v num">{{ detail.share_net_worth|pct }}</div></div>
+      {% for key, value in detail.facts.items() %}
+      <div><div class="k">{{ key }}</div><div class="v num">{{ value if value is not none else '—' }}</div></div>
+      {% endfor %}
+    </div>
+    {% if valuation %}
+    <section class="sec" id="valuation"><h3>Valuation</h3><div class="card facts">
+      <div><div class="k">Source</div><div class="v">{{ valuation.label or '—' }}{% if valuation.is_override %} <small>wins until you refresh</small>{% endif %}</div></div>
+      <div><div class="k">As of</div><div class="v num">{{ valuation.date|day_label if valuation.date else '—' }}</div></div>
+      <div><div class="k">Home equity</div><div class="v num">{{ equity.equity|money if equity and equity.equity is not none else '—' }}</div></div>
+      <div><div class="k">Change it</div><div class="v"><a href="/account/{{ account.id }}/valuation">Update value</a></div></div>
+    </div></section>
+    {% endif %}
+    {% if account.is_liability %}
+    <section class="sec"><h3>{{ detail.terms_title }}</h3><div class="card">
+      {% if detail.terms %}<div class="facts">
+        {% for key, value in detail.terms.items() %}<div><div class="k">{{ key }}</div><div class="v num">{{ value if value is not none else '—' }}</div></div>{% endfor %}
+      </div>{% else %}<p class="empty">No terms recorded yet.</p>{% endif %}
+    </div></section>
+    {% endif %}
+    {% if detail.show_holdings %}
+    <section class="sec"><h3>Holdings</h3><div class="card tscroll">
+      {% if detail.holdings %}
+      <table><thead><tr><th>Ticker</th><th>Name</th><th class="r">Weight</th><th class="r">Value</th></tr></thead><tbody>
+        {% for holding in detail.holdings %}<tr><td>{{ holding.ticker or '—' }}</td><td>{{ holding.name or '—' }}</td><td class="r num">{{ holding.weight|pct }}</td><td class="r num">{{ holding.value|money2 }}</td></tr>{% endfor %}
+      </tbody></table>
+      {% else %}<p class="empty">No holdings recorded yet.</p>{% endif %}
+    </div></section>
+    {% endif %}
+  </div>
+</div>
+<section class="sec"><h3>Recent activity</h3><div class="card">
+  {% for tx in detail.activity %}
+  <div class="tx"><span class="m">{{ tx.label }}</span><span class="amt num{% if tx.amount > 0 %} in{% endif %}">{{ '+' if tx.amount > 0 else '' }}{{ tx.amount|money2 }}</span><span class="meta">{{ tx.category or '—' }} · {{ detail.institution or '—' }} {{ account.name }} · {{ tx.date|day_label }}{% if tx.pending %} · <b>Pending</b>{% endif %}</span></div>
+  {% else %}<p class="empty">No recent activity.</p>{% endfor %}
+</div></section>
+<section class="sec" id="history"><h3>Balance history</h3>
+  {% if account.is_liability %}<p class="history-log">Enter the amount owed. A negative amount means overpaid.</p>{% endif %}
+  {% if message %}<p role="status">{{ message }}</p>{% endif %}
+  {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+  <div class="history-toolbar">
+    <strong>{{ history.month|month_label }}</strong>
+    <span>{% if history.status == 'in_progress' %}Month in progress{% elif history.status == 'closed' %}{% if history.own_row %}Closed · month-end balances are locked{% else %}Closed for other accounts · this account's figure comes from its daily balances and can still change{% endif %}{% else %}Not closed yet{% endif %}</span>
+    {% if history.prev_month %}<a href="?month={{ history.prev_month }}#history" aria-label="Previous month">← Previous</a>{% endif %}
+    {% if history.next_month %}<a href="?month={{ history.next_month }}#history" aria-label="Next month">Next →</a>{% endif %}
+    {% if history.status == 'open' %}<form method="post" action="/account/{{ account.id }}/history/close"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}"><input type="hidden" name="month" value="{{ history.month }}"><button class="btn">Close month</button></form>{% endif %}
+  </div>
+  <div class="card tscroll">
+    {% if history.rows %}
+    <table class="history-table"><thead><tr><th>Date</th><th>Balance</th><th>Change</th><th>Source</th><th><span class="sr-only">Action</span></th></tr></thead><tbody>
+      {% for row in history.rows %}
+      <tr><td>{{ row.date|day_label }}</td><td class="num">
+        {% if row.editable %}<input inputmode="decimal" name="balance" form="f-{{ row.date }}" aria-label="Balance on {{ row.date }}" value="{{ row.input_value }}">{% else %}{{ row.balance_cents|money2 }}{% endif %}
+      </td><td class="num {{ 'pos' if row.change is not none and row.change > 0 else 'neg' if row.change is not none and row.change < 0 else 'flat' }}">{{ row.change|dTxt2 }}</td><td>{{ row.source|capitalize }}{% if row.is_month_end %}<br>Month-end · locked{% if row.recorded_cents is not none %}<br>Daily record: {{ row.recorded_cents|money2 }}{% endif %}{% elif row.locked_by %}<br>Locked · used by {{ row.locked_by|month_label }} month-end{% endif %}</td><td>
+        {% if row.editable %}<form id="f-{{ row.date }}" method="post" action="/account/{{ account.id }}/history/{{ row.date }}"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}"><input type="hidden" name="month" value="{{ history.month }}"></form><button form="f-{{ row.date }}" class="btn history-save">Save</button>{% elif row.is_month_end %}<a href="#admin">Reopen month</a>{% elif row.locked_by %}<a href="?month={{ row.locked_by }}#admin">Reopen month</a>{% endif %}
+      </td></tr>
+      {% endfor %}
+    </tbody></table>
+    {% else %}<p class="empty">No balance history yet.</p>{% endif %}
+  </div>
+  {% for reopen in history.reopens %}<p class="history-log">Month reopened {{ reopen.reopened_at|day_label }} · archived balance {{ reopen.balance|money2 }}{% if reopen.reason %} · {{ reopen.reason }}{% endif %}</p>{% endfor %}
+  {% if detail.edits %}<h4>Recent balance edits</h4>{% endif %}
+  {% for edit in detail.edits %}<p class="history-log">{{ edit.date|day_label }}: {{ edit.old_balance|money2 }} → {{ edit.new_balance|money2 }}, edited {{ edit.edited_at|day_label }}</p>{% endfor %}
+</section>
+{% if history.status == 'closed' %}
+<section class="sec" id="admin"><h3>Admin · Reopen {{ history.month|month_label }}</h3>
+  <p>This unlocks the month for ALL accounts. The current month-end balances are kept permanently in an archive. The month must be closed again afterwards.</p>
+  <form class="reopen-form" method="post" action="/account/{{ account.id }}/history/reopen"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+    <input type="hidden" name="month" value="{{ history.month }}">
+    <label for="confirm-month">Type {{ history.month }} to confirm</label><input id="confirm-month" name="confirm" autocomplete="off" required>
+    <label for="reopen-reason">Reason (optional)</label><input id="reopen-reason" name="reason">
+    <button class="btn">Reopen month</button>
+  </form>
+</section>
+{% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Add an account · Orbit{% endblock %}
+{% block content %}
+<a class="back" href="/dashboard">← Dashboard</a>
+<div class="dhead"><div><h1>Add an account or data source</h1><div class="sub">Anything with a balance or a cash flow. Orbit places it on your ledger.</div></div></div>
+<div class="sources">
+  <a class="card src" href="/settings"><span class="t">Link a bank or brokerage</span><span class="d">Read-only connection through Plaid. Balances and transactions sync nightly.</span><span class="m">Plaid</span></a>
+  <a class="card src" href="/add/import"><span class="t">Import a file</span><span class="d">CSV, OFX or QFX export from any institution. Layout detected; mapping saved as a rule.</span><span class="m">CSV · OFX · QFX</span></a>
+  <a class="card src" href="/add/manual"><span class="t">Add a manual asset or debt</span><span class="d">Home, car, private stake, a loan from a friend. Set a value and update it when you like.</span><span class="m">Manual</span></a>
+  <a class="card src" href="/paycheck"><span class="t">Import paystubs</span><span class="d">PDF from your payroll provider. Taxes, pre-tax and post-tax lines become data.</span><span class="m">PDF</span></a>
+  <a class="card src" href="/add/manual?type=crypto"><span class="t">Crypto wallet or exchange</span><span class="d">Enter a holding's value by hand. Wallet scanning isn't available yet.</span><span class="m">Manual</span></a>
+  <a class="card src" href="/add/manual?type=property"><span class="t">Property estimate</span><span class="d">Add the property, then enter its address on its page for a monthly estimate. Equity is computed against the mortgage.</span><span class="m">RentCast · manual</span></a>
+</div>
+<section class="sec"><h3>How it adapts</h3><div class="card"><div class="facts adapt">
+  <div><div class="k">Type inference</div><div class="v">Types come from the institution and account details. Manual accounts can be changed on their edit form.</div></div>
+  <div><div class="k">Column mapping</div><div class="v">CSV and OFX imports map date, amount, memo and balance automatically; unknown layouts get a one-time mapping you can save as a rule.</div></div>
+  <div><div class="k">Manual assets</div><div class="v">Enter a value and an optional note; history starts today.</div></div>
+  <div><div class="k">Your data</div><div class="v">Self-hosted. A SQLite file you can copy.</div></div>
+</div></div></section>
+{% endblock %}

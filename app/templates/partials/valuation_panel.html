@@ -1,0 +1,37 @@
+<section class="card">
+  <div class="hd"><h2>Property valuation</h2></div>
+  <div class="bd">
+    {% if message %}<p role="status">{{ message }}</p>{% endif %}
+    <div class="num">{{ valuation.value|money }}</div>
+    <p>{{ valuation.label or 'No value recorded yet' }}{% if valuation.date %} · {{ valuation.date }}{% endif %}</p>
+    {% if valuation.low is not none or valuation.high is not none %}<p>Estimate range: {{ valuation.low|money }} – {{ valuation.high|money }}</p>{% endif %}
+    {% if valuation.is_override %}<span class="chip">Manual override · wins until you refresh</span>{% endif %}
+    <form method="post" action="/account/{{ account.id }}/valuation/override"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <label>Manual value <input name="value" inputmode="decimal" required></label>
+      <button class="btn" type="submit">Save override</button>
+    </form>
+    {% if not valuation.configured %}<p>RentCast is not configured. Add RENTCAST_API_KEY in your local settings to enable estimates. You can still enter a manual value.</p>{% endif %}
+    {% if quota_reached %}<p>RentCast request limit reached for the past 31 days. Cached estimates are still available. New estimates resume as older requests leave that window.</p>{% endif %}
+    <form method="post" action="/account/{{ account.id }}/valuation/refresh"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <button class="btn" type="submit">Refresh from RentCast</button>
+    </form>
+    <form method="post" action="/account/{{ account.id }}/property-details"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <p><label>Property address <input name="address" value="{{ valuation.address or '' }}" autocomplete="street-address"></label></p>
+      {% set selected = (valuation.linked_liability or '').split(',') %}
+      <p><label>Linked mortgages or liabilities <select name="linked_liability" multiple>
+        <option value="">No linked liability</option>
+        <option value="none"{% if 'none' in selected %} selected{% endif %}>No mortgage (paid off)</option>
+        {% for liability in liabilities %}<option value="{{ liability.id }}"{% if liability.id|string in selected %} selected{% endif %}>{{ liability.name }}{% if liability.hidden %} (hidden){% endif %}</option>{% endfor %}
+      </select></label></p>
+      <button class="btn" type="submit">Save property details</button>
+    </form>
+  </div>
+</section>
+<div class="sec"><h3>Valuation history</h3>
+  <a class="csv" href="/export/account-{{ account.id }}-valuations.csv">Export CSV</a>
+  <div class="card tscroll"><table>
+    <thead><tr><th>Date</th><th class="r">Value</th><th>Source</th></tr></thead>
+    <tbody>{% for row in history %}<tr><td>{{ row.date }}</td><td class="r num">{{ row.value|money }}</td><td>{{ 'RentCast estimate' if row.source == 'rentcast' else 'Manual value' }}</td></tr>
+    {% else %}<tr><td colspan="3">No valuations yet.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>

@@ -1,0 +1,13 @@
+<section class="sec"><h3>Match the accounts</h3><p>{{ filename }}. No data has been imported yet.</p>
+<form class="card entry-form" method="post" action="/add/import/confirm" hx-post="/add/import/confirm" hx-target="#import-panel" hx-disabled-elt="find button"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+  <input type="hidden" name="token" value="{{ token }}">
+  {% for statement in statements %}{% set index = loop.index0|string %}
+  <fieldset><legend>{{ statement.name }}</legend>
+    {% if statement.account_id %}<p>Matched to an existing account.</p><input type="hidden" name="account_id_{{ index }}" value="{{ statement.account_id }}">
+    {% else %}<label>Import into <select name="account_id_{{ index }}" required><option value="new">New {{ statement.type }} account: {{ statement.name }}</option>{% for account in accounts %}<option value="{{ account.id }}"{% if choices.get(index, {}).get('account_id') == account.id|string %} selected{% endif %}>{{ account.name }}</option>{% endfor %}</select></label>{% endif %}
+    {% if statement.needs_sign %}<label>The file shows a positive card balance of ${{ '{:,.2f}'.format(statement.balance) }}. Is this <select name="liability_balance_sign_{{ index }}" required><option value="">Choose</option><option value="positive">What you owe</option><option value="negative">A credit in your favour</option></select></label><p>Orbit will remember this answer for this institution.</p>
+    {% elif statement.balance_sign %}<input type="hidden" name="liability_balance_sign_{{ index }}" value="{{ statement.balance_sign }}">{% endif %}
+  </fieldset>
+  {% endfor %}
+  <button class="btn primary" type="submit">Import accounts</button>
+</form></section>

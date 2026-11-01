@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Settings · Orbit{% endblock %}
+{% block content %}
+{% macro account_list(accounts) %}
+<ul class="settings-accounts">
+  {% for account in accounts %}
+  <li>
+    <div>
+      <strong>{{ account.name }}</strong>{% if account.mask %} · {{ account.mask }}{% endif %}
+      {% if account.hidden %}<span class="demo">Hidden</span>{% endif %}
+      {% if account.closed %}<span class="demo">Closed</span>{% endif %}
+      {% if account.currency != 'USD' %}<p>Not in USD, so hidden from totals</p>{% endif %}
+      {% if account.missing_since %}<p>No longer reported by Plaid</p>{% endif %}
+      {% if not account.has_balance %}<p>No balance reported</p>{% endif %}
+    </div>
+    {% if account.can_close %}
+    <form method="post" action="/settings/accounts/{{ account.id }}/closed"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}"><button class="btn">Mark closed</button></form>
+    {% endif %}
+    <form method="post" action="/settings/accounts/{{ account.id }}/visibility"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <button class="btn" name="hidden" value="{{ 'false' if account.hidden else 'true' }}">{{ 'Unhide' if account.hidden else 'Hide' }}</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+{% endmacro %}
+<div class="settings-cards">
+<h1>Settings</h1>
+<p style="color:var(--fg-2);margin:4px 0 14px">{% if last_backup %}Last backup: {{ last_backup.isoformat() }}{% else %}No backup yet{% endif %}</p>
+{% if sandbox %}<p>Sandbox mode: connected accounts contain fake data. Remove the connection and hide its accounts when you finish testing.</p>{% endif %}
+{% if message %}<p role="status">{{ message }}</p>{% endif %}
+<p>Hide also removes it from past net worth. Use Mark closed for an account that was really closed.</p>
+{% if webhook_invalid %}<p>Set PLAID_WEBHOOK_URL to an HTTPS address with path /plaid/webhook and set ORBIT_WEBHOOK_PORT; omit credentials, query and fragment.</p>{% endif %}
+<section class="card">
+  <div class="hd"><h2>Account connections</h2></div>
+  <div class="bd">
+    {% if missing %}
+    <p>Set valid values in .env for: {% for name in missing %}<code>{{ name }}</code>{% if not loop.last %}, {% endif %}{% endfor %}.</p>
+    <p>Restart Orbit after updating your settings.</p>
+    {% endif %}
+    <form method="post" action="/settings/plaid/connect" class="settings-actions"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <button class="btn primary" name="product_set" value="banking"{% if missing %} disabled{% endif %}>Connect a bank, card or loan</button>
+      <button class="btn" name="product_set" value="investments"{% if missing %} disabled{% endif %}>Connect a brokerage or retirement account</button>
+    </form>
+  </div>
+</section>
+{% for item in items %}
+<section class="card">
+  <div class="hd"><h2>{{ item.name }}</h2></div>
+  <div class="bd">
+    <p>{{ item.accounts|length }} account{% if item.accounts|length != 1 %}s{% endif %} · {{ item.status.replace('_', ' ') }}</p>
+    <p>Last synced: {{ item.last_synced_at.strftime('%Y-%m-%d %H:%M') if item.last_synced_at else 'Not yet synced' }}</p>
+    {% if item.unreadable %}<p>Orbit cannot read this connection's saved token. Restore the old FERNET_KEY in .env if you still have it, or forget and reconnect.</p>{% elif item.last_error_code == 'TOKEN_UNREADABLE' %}<p>Check FERNET_KEY in .env to restore this connection.</p>{% elif item.last_error_code == 'DUPLICATE_CONNECTION' %}<p>This duplicates another connection. Remove it.</p>{% elif item.status == 'login_required' %}<p>Your institution needs you to sign in again. Re-authenticate to resume updates.</p>{% elif item.status == 'error' %}<p>The last sync could not finish. Earlier data is kept. Orbit will retry during the next scheduled sync.</p>{% endif %}
+    <div class="settings-actions">
+      {% if item.unreadable %}
+      <form method="post" action="/settings/plaid/items/{{ item.id }}/forget" onsubmit="return confirm('If you still have the old key, restore it in .env instead: Forget cannot be undone. Orbit cannot revoke this connection at Plaid. Remove it from the Plaid dashboard too; it may keep being billed until you do. Accounts and history stay in Orbit. Forget this connection?');"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}"><button class="btn">Forget this connection</button></form>
+      {% else %}
+      <form method="post" action="/settings/plaid/items/{{ item.id }}/reauth"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}"><button class="btn"{% if missing %} disabled{% endif %}>Re-authenticate</button></form>
+      <form method="post" action="/settings/plaid/items/{{ item.id }}/remove" onsubmit="return confirm('Remove this connection? Accounts and history stay in Orbit. Use Mark closed afterwards if the account was really closed.');"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}"><button class="btn"{% if missing %} disabled{% endif %}>Remove connection</button></form>
+      {% endif %}
+    </div>
+    {{ account_list(item.accounts) }}
+  </div>
+</section>
+{% else %}<p>No institutions connected yet.</p>{% endfor %}
+{% if disconnected %}
+<section class="card">
+  <div class="hd"><h2>Disconnected accounts</h2></div>
+  <div class="bd">{{ account_list(disconnected) }}</div>
+</section>
+{% endif %}
+{% for link in pending %}
+<section class="card">
+  <div class="hd"><h2>Unfinished {{ 'connection' if link.kind == 'connect' else 're-authentication' }}</h2></div>
+  <div class="bd"><form method="post" action="/settings/plaid/sessions/{{ link.id }}/check"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}"><button class="btn"{% if missing %} disabled{% endif %}>Check again</button></form></div>
+</section>
+{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,3 @@
+Details,Posting Date,Description,Amount,Type,Balance,Check or Slip #
+DEBIT,10/30/2026,Fake Coffee,-4.50,DEBIT_CARD,995.50,,
+CREDIT,10/31/2026,Fake Payment,40.00,ACH_CREDIT,1035.50,,

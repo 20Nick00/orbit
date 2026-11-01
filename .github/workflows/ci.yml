@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest
+      - run: node --test tests/service_worker.test.cjs
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the Docker quickstart
+        run: |
+          cp .env.example .env
+          mkdir -p data && sudo chown 1000:1000 data
+          docker compose config --quiet
+          docker compose up -d --build
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl -fsS --max-time 1 http://127.0.0.1:8000/health; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          test "$ready" = 1
+          docker compose exec -T orbit python -m core.demo
+          curl -fsS http://127.0.0.1:8000/dashboard > /dev/null
+          curl -fsS http://127.0.0.1:8000/manifest.webmanifest > /dev/null
+          curl -fsS http://127.0.0.1:8000/sw.js > /dev/null
+          docker compose exec -T orbit python -m jobs.backup
+          test -n "$(find data/backups -maxdepth 1 -name 'orbit-????-??-??.sqlite' -print -quit)"
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose logs
+      - name: Stop containers
+        if: always()
+        run: docker compose down

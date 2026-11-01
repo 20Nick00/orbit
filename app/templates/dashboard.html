@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Orbit{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='charts.js').path }}" defer></script>{% endblock %}
+{% block topright %}
+{% if dashboard %}
+<div class="right">
+  {% if dashboard.is_demo %}<span class="demo">Example data</span>{% endif %}
+  <div class="sync"><span class="dot" aria-hidden="true"></span><span class="t">{{ dashboard.last_updated|updated(today)|capitalize }} · {{ dashboard.account_count }} {{ 'account' if dashboard.account_count == 1 else 'accounts' }}</span></div>
+</div>
+{% endif %}
+{% endblock %}
+{% block content %}
+{% if notice %}
+<p class="empty">{{ notice }}</p>
+{% elif not dashboard %}
+<p class="empty">No accounts yet.</p>
+{% else %}
+<section class="view on" id="view-dashboard">
+  <div class="dash">
+    {% with side='Assets', total=dashboard.assets, groups=dashboard.assets_groups %}{% include '_side_column.html' %}{% endwith %}
+    <div class="col center">
+      <div class="card">
+        <div class="hero">
+          <span class="eyebrow">Net worth</span>
+          <div class="big num" id="nwBig">{{ dashboard.net_worth|fmt }}</div>
+          <div class="deltas" id="nwDeltas">
+            {% for label, delta in dashboard.deltas.items() %}
+            <span><span class="l">{{ label }}</span><b class="num {{ delta.cls if delta else 'flat' }}">{{ delta|dTxt }}</b> <span class="{{ delta.cls if delta else 'flat' }}">{{ (delta.p|abs if delta and delta.p is not none else none)|pct }}</span></span>
+            {% endfor %}
+          </div>
+          <div class="ranges"><div class="seg" id="rangeSeg" role="group" aria-label="Range">
+            {% for range in ranges %}
+            <button type="button" aria-pressed="{{ 'true' if range == '1Y' else 'false' }}" hx-get="/dashboard/chart?range={{ range }}" hx-target="#nwChartSlot" hx-swap="innerHTML" hx-sync="closest .seg:replace">{{ range }}</button>
+            {% endfor %}
+          </div></div>
+          <div id="nwChartSlot">{% with chart=dashboard.chart %}{% include '_chart.html' %}{% endwith %}</div>
+        </div>
+        <div class="comp">
+          {% set shades = [1, 0.78, 0.58, 0.42, 0.3, 0.2, 0.12] %}
+          {% for side, total, groups, color in [('Assets', dashboard.assets, dashboard.assets_groups, 's1'), ('Liabilities', dashboard.liabilities, dashboard.liabilities_groups, 's2')] %}
+          <div class="lbl"><span>{{ side }} by type</span><span class="num">{{ total|fmtS }}</span></div>
+          <div class="stack{% if side == 'Liabilities' %} liab{% endif %}">
+            {% for group in groups %}
+            {% if group.share is not none %}
+            <a href="/type/{{ group.type }}" title="{{ group.name }}" aria-label="{{ group.name }} {{ group.total|abs|fmt }}" style="width:{{ group.share * 100 }}%"><i style="width:100%;opacity:{{ shades[loop.index0] if loop.index0 < shades|length else shades[-1] }}"></i></a>
+            {% endif %}
+            {% endfor %}
+          </div>
+          <div class="legend">
+            {% for group in groups %}
+            <span><i style="opacity:{{ shades[loop.index0] if loop.index0 < shades|length else shades[-1] }};background:var(--{{ color }})"></i>{{ group.name }} <b class="num">{{ group.share|pct(0) }}</b></span>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+        <div class="facts" id="nwFacts">
+          {% for name, value in dashboard.facts.items() %}
+          <div><div class="k">{{ name }}</div><div class="v num">{% if name == 'Debt to assets' %}{{ value|pct(0) }}{% elif name == '1-yr change' %}{{ value|dTxt }}{% else %}{{ value|fmtS }}{% endif %}</div>{% if name == 'Home equity' and dashboard.home_equity_note %}<small>{{ dashboard.home_equity_note }}</small>{% endif %}</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% with side='Liabilities', total=dashboard.liabilities, groups=dashboard.liabilities_groups %}{% include '_side_column.html' %}{% endwith %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#0E6E7A">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+  <title>{% block title %}Orbit{% endblock %}</title>
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ url_for('static', path='vendor/fonts/manrope-latin-wght-normal.woff2').path }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='orbit.css').path }}">
+  <script src="{{ url_for('static', path='vendor/htmx.min.js').path }}" defer></script>
+  <script src="/static/pwa.js" defer></script>
+  {% block scripts %}{% endblock %}
+  {% block head %}{% endblock %}
+</head>
+<body hx-headers='{"X-CSRF-Token": "{{ request.state.csrf_token }}"}'>
+  <header class="top"><div class="in">
+    <div class="wordmark">
+      <span class="mark"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="8" r="2.2" fill="currentColor" stroke="none"/><ellipse cx="8" cy="8" rx="6.5" ry="2.6" transform="rotate(-25 8 8)"/><circle cx="13.2" cy="5.2" r="1.1" fill="currentColor" stroke="none"/></svg></span>
+      <span class="name">Orbit</span>
+    </div>
+    <nav class="nav" aria-label="Main">
+      <a href="/dashboard"{% if request.url.path == '/dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+      <a href="/trends"{% if request.url.path == '/trends' %} aria-current="page"{% endif %}>Trends</a>
+      <a href="/almanac"{% if request.url.path == '/almanac' %} aria-current="page"{% endif %}>Almanac</a>
+      <a href="/paycheck"{% if request.url.path.startswith('/paycheck') %} aria-current="page"{% endif %}>Paycheck</a>
+      <a href="/settings"{% if request.url.path.startswith('/settings') %} aria-current="page"{% endif %}>Settings</a>
+    </nav>
+    {% block topright %}{% endblock %}
+    <a href="/add" class="btn primary" style="text-decoration:none;padding:6px 11px">+ Add</a>
+  </div></header>
+  <main><div class="wrap">{% block content %}{% endblock %}</div></main>
+  <nav class="tabs" aria-label="Main, phone">
+    <a href="/dashboard"{% if request.url.path == '/dashboard' %} aria-current="page"{% endif %}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="/trends"{% if request.url.path == '/trends' %} aria-current="page"{% endif %}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>Trends</a>
+    <a href="/almanac"{% if request.url.path == '/almanac' %} aria-current="page"{% endif %}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Almanac</a>
+    <a href="/paycheck"{% if request.url.path.startswith('/paycheck') %} aria-current="page"{% endif %}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 7h18v10H3z"/><circle cx="12" cy="12" r="2.5"/></svg>Paycheck</a>
+    <a href="/settings"{% if request.url.path.startswith('/settings') %} aria-current="page"{% endif %}><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M4 12h3M17 12h3M12 4v3M12 17v3M6.3 6.3l2.1 2.1M15.6 15.6l2.1 2.1M6.3 17.7l2.1-2.1M15.6 8.4l2.1-2.1"/></svg>Settings</a>
+  </nav>
+</body>
+</html>

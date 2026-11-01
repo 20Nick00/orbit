@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}{{ account.name }} valuation · Orbit{% endblock %}
+{% block content %}
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/dashboard">Dashboard</a> / <a href="/account/{{ account.id }}">{{ account.name }}</a> / <span aria-current="page">Valuation</span></nav>
+<div class="dhead"><h1>{{ account.name }}</h1></div>
+{% include "partials/valuation_panel.html" %}
+{% endblock %}

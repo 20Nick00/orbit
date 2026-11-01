@@ -1,0 +1,25 @@
+{% if error %}<p class="empty" role="alert">{{ error }}</p>{% endif %}
+{% if panel == 'csv' %}{% include '_import_mapping.html' %}{% endif %}
+{% if panel == 'ofx' %}{% include '_import_ofx.html' %}{% endif %}
+{% if panel == 'result' %}
+<section class="sec"><h3>Import complete</h3>
+{% for result in results %}
+<div class="card entry-form">
+  <p>Added to {{ result.account_name }} as {{ result.type_label }}{% if result.is_liability %} (counts as a debt){% endif %}</p>
+  {% if result.missing_balance %}
+  <p role="alert"><strong>Net worth will show as missing until you enter this account's current balance.</strong></p>
+  <a class="btn primary" href="/account/{{ result.account_id }}/manual">Enter current balance</a>
+  {% endif %}
+  <p>{{ result.added }} added · {{ result.duplicates_skipped }} duplicates skipped · {{ result.balances_written }} balances written.</p>
+  {% if result.date_range %}<p>{{ result.date_range[0] }} to {{ result.date_range[1] }}</p>{% endif %}
+  {% if result.unreadable_rows %}<p>Unreadable rows skipped: {{ result.unreadable_rows|join(', ') }}.</p>{% endif %}
+  {% if result.balances %}{% set day, balance = result.balances[-1] %}
+    <p>{% if result.is_liability %}{% if balance < 0 %}You have a credit of ${{ '{:,.2f}'.format(-balance) }}{% else %}You owe ${{ '{:,.2f}'.format(balance) }}{% endif %}{% else %}Balance: ${{ '{:,.2f}'.format(balance) }}{% endif %} as of {{ day }}.</p>
+  {% endif %}
+  {% if result.balance_days_skipped %}<p>{{ result.balance_days_skipped }} balance days skipped: manual values, edited balances and balances used by a closed month are protected.</p>{% endif %}
+  {% for notice in result.notices %}<p>{{ notice }}</p>{% endfor %}
+  <a href="/account/{{ result.account_id }}">View account →</a>
+</div>
+{% endfor %}</section>
+{% endif %}
+{% if panel in ['result', 'error'] %}<p><a href="/add/import">Import another file</a></p>{% endif %}

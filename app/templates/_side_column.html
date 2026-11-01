@@ -1,0 +1,14 @@
+<div class="col{% if side == 'Liabilities' %} liab{% endif %}">
+  <div class="colhd"><h2>{{ side }}</h2><span class="tot num">{{ total|fmtS }}</span></div>
+  {% for group in groups %}
+  <div class="card">
+    <a class="ghd" href="/type/{{ group.type }}">
+      <span class="gn">{{ group.name }}</span>
+      <span class="gt num">{{ group.total|fmtS }}<span class="sh">{{ group.share|pct(0) }}</span></span>
+    </a>
+    {% for account in group.accounts %}
+    {% include '_account_row.html' %}
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>

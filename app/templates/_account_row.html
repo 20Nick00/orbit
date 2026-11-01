@@ -1,0 +1,9 @@
+<a class="row" href="/account/{{ account.id }}">
+  <span class="n">{{ account.name }}</span><span class="v num">{{ account.balance|fmtS }}</span>
+  <span class="s">{{ account.institution or '—' }}{% if account.subtitle %} · {{ account.subtitle }}{% endif %}</span>
+  <span class="d {{ account.delta.cls if account.delta else 'flat' }}">{% if not account.delta or account.delta.cls == 'flat' %}—{% else %}{{ account.delta|dTxt }}{% endif %} 30d</span>
+  <span class="row-footer">
+    <span class="bar">{% if account.bar_pct is not none %}<i style="width:{{ [1, account.bar_pct]|max }}%"></i>{% endif %}</span>
+    <span class="chip">{{ account.last_snapshot|updated(today) }}</span>
+  </span>
+</a>

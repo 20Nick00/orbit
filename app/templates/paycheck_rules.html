@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Mapping rules · Orbit{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', path='paycheck.css').path }}">{% endblock %}
+{% block content %}
+<div class="dhead"><h1>Mapping rules{% if editing %} · {{ rule.employer }}{% endif %}</h1><a href="/paycheck">Back to Paycheck</a></div>
+<p>Stubs already imported are not changed. Saved mappings apply to future stubs and files waiting for review.</p>
+{% if editing %}
+  {% if error %}<p class="neg" role="alert">{{ error }}</p>{% endif %}
+  <p>Rule file: {{ slug }}.yaml</p>
+  <form method="post" action="/paycheck/rules/{{ slug }}" class="card pay-review"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+    {% include "paycheck_mapping_fields.html" %}
+    <div class="bd"><button class="btn primary" type="submit">Save rule</button></div>
+  </form>
+{% else %}
+  <section class="card"><div class="bd">
+  {% for entry in rules %}<p>{% if entry.rule %}<a href="/paycheck/rules/{{ entry.slug }}">{{ entry.rule.employer }}</a>{% else %}Rule could not be read{% endif %} · {{ entry.file }}</p>{% else %}<p>No employer mappings yet. Import a paystub to create one.</p>{% endfor %}
+  </div></section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,18 @@
+<div class="card">
+  <div class="hero">
+    <span class="eyebrow">{{ detail.eyebrow }}</span>
+    <div class="big num">{{ detail.balance|fmt }}</div>
+    <div class="deltas">
+      {% for label, delta in detail.deltas.items() %}
+      <span><span class="l">{{ label }}</span><b class="num {{ delta.cls if delta else 'flat' }}">{{ delta|dTxt }}</b> <span class="{{ delta.cls if delta else 'flat' }}">{{ (delta.p|abs if delta and delta.p is not none else none)|pct }}</span></span>
+      {% endfor %}
+    </div>
+    {% if detail.is_liability %}<p class="sub">Changes show the effect on net worth.</p>{% endif %}
+    <div class="ranges"><div class="seg" role="group" aria-label="Range">
+      {% for range in ranges %}
+      <button type="button" aria-pressed="{{ 'true' if range == '3M' else 'false' }}" hx-get="{{ chart_url }}?range={{ range }}" hx-target="#detailChartSlot" hx-swap="innerHTML" hx-sync="closest .seg:replace">{{ range }}</button>
+      {% endfor %}
+    </div></div>
+    <div id="detailChartSlot">{% with chart=detail.chart %}{% include '_chart.html' %}{% endwith %}</div>
+  </div>
+</div>

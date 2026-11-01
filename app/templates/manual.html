@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit account' if account else 'Add a manual asset or debt' }} · Orbit{% endblock %}
+{% block content %}
+<a class="back" href="{{ '/account/' ~ account.id if account else '/add' }}">← Back</a>
+<div class="dhead"><div><h1>{{ 'Edit account' if account else 'Add a manual asset or debt' }}</h1><div class="sub">Every save records today's value.</div></div></div>
+{% if error %}<p class="empty" role="alert">{{ error }}</p>{% endif %}
+<form class="card entry-form" method="post" action="{{ action }}"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+  <label>Name <input name="name" value="{{ values.name }}" required maxlength="200"></label>
+  <label>Type <select name="type"><option value="">Detect from name</option>{% for type in types %}<option value="{{ type }}"{% if values.type == type %} selected{% endif %}>{{ type|capitalize }}</option>{% endfor %}</select></label>
+  <label class="check"><input type="checkbox" name="is_liability"{% if values.is_liability %} checked{% endif %}> For “other”, this is money I owe</label>
+  <label>Value <input name="value" value="{{ values.value }}" inputmode="decimal" required aria-describedby="value-hint"></label>
+  <p id="value-hint">For a card, loan or other debt, enter what you owe as a positive number. A credit in your favour is negative.</p>
+  <label>Note (optional) <textarea name="note" rows="3">{{ values.note }}</textarea></label>
+  <button class="btn primary" type="submit">Save value</button>
+</form>
+{% endblock %}

@@ -1,0 +1,7 @@
+Transaction Date,Post Date,Description,Category,Type,Amount,Memo
+10/31/2026,10/31/2026,Fake Payment,Transfer,Payment,40.00,
+10/30/2026,10/31/2026,Fake Coffee,Food,Sale,-4.50,
+10/29/2026,10/30/2026,Fake Books,Shopping,Sale,-10.00,
+10/28/2026,10/29/2026,Fake Lunch,Food,Sale,-12.00,
+10/27/2026,10/28/2026,Fake Tram,Transport,Sale,-3.00,
+10/26/2026,10/27/2026,Fake Grocer,Food,Sale,-20.00,

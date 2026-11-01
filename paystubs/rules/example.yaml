@@ -1,0 +1,21 @@
+# Synthetic employer only. Real employer rules must stay out of Git.
+employer: Northwind Test Labs Inc
+match:
+  - Northwind Test Labs
+labels:
+  Gross Pay: gross
+  Net Pay: net
+  Federal Income Tax: tax
+  NY State Income Tax: tax
+  NYC Income Tax: tax
+  Social Security: tax
+  Medicare: tax
+  401(k) Pre-tax: pretax
+  HSA: pretax
+  Medical Premium: benefit
+  Dental Premium: benefit
+  Employer 401(k) Match: employer
+  Regular: ignore
+limits:
+  401(k) Pre-tax: 401k
+  HSA: hsa

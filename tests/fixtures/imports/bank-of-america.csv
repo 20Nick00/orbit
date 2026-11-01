@@ -1,0 +1,7 @@
+Fake Bank of America checking export
+Description,Summary Amt.
+Beginning balance,1000.00
+Date,Description,Amount,Running Bal.
+10/29/2026,Beginning balance,,1000.00
+10/30/2026,Fake Coffee,-4.50,995.50
+10/31/2026,Fake Payment,40.00,1035.50

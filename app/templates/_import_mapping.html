@@ -1,0 +1,30 @@
+<section class="sec"><h3>Review the columns</h3>
+<p>{{ filename }} · {{ account.name }}. No data has been imported yet.</p>
+{% set reasons = {'header': 'the file has no column headings', 'roles': 'some column meanings are unclear', 'date_format': 'the date order is unclear or some dates cannot be read', 'amount': 'some amounts cannot be read', 'rows': 'some rows cannot be read', 'liability_amount_sign': 'the money-in and money-out signs need confirmation', 'liability_balance_sign': 'the balance sign needs confirmation', 'unsigned_amounts': 'every amount is positive'} %}
+<p>Orbit needs your help because {% for issue in analysis.ambiguities %}{{ reasons[issue] }}{{ '; ' if not loop.last else '.' }}{% endfor %}</p>
+{% if 'header' in analysis.ambiguities %}<p>No header was found. Choose what each column means.</p>{% endif %}
+{% if 'roles' in analysis.ambiguities %}<p>Choose a date column and either one amount column or both money-out and money-in columns. Use each column once.</p>{% endif %}
+{% if 'amount' in analysis.ambiguities or 'rows' in analysis.ambiguities %}<p>Automatic import needs 90% readable rows. After you confirm, at least half the non-empty dates and amounts must be readable, with at least one complete row. Unreadable rows will be skipped and listed.</p>{% endif %}
+<div class="card tscroll"><table><thead><tr><th>Row</th>{% for column in analysis.columns %}<th>{{ column }}</th>{% endfor %}</tr></thead><tbody>
+{% for number, values in analysis.raw_rows[:5] %}<tr><td>{{ number }}</td>{% for value in values %}<td>{{ value }}</td>{% endfor %}</tr>{% endfor %}
+</tbody></table></div>
+<form class="card entry-form" method="post" action="/add/import/confirm" hx-post="/add/import/confirm" hx-target="#import-panel" hx-disabled-elt="find button"><input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+  <input type="hidden" name="token" value="{{ token }}">
+  {% set labels = {'date': 'Transaction date', 'amount': 'Amount (one signed column)', 'debit': 'Money out / debit', 'credit': 'Money in / credit', 'direction': 'Debit or credit indicator (DR/CR)', 'memo': 'Description / memo', 'merchant': 'Merchant / payee (if separate)', 'balance': 'Account balance', 'category': 'Category'} %}
+  {% for role in roles %}<label>{{ labels[role] }} <select name="{{ role }}"><option value="">Not in this file</option>{% for column in analysis.columns %}<option value="{{ loop.index0 }}"{% if analysis.mapping.roles.get(role) == loop.index0 %} selected{% endif %}>{{ column }}</option>{% endfor %}</select></label>{% endfor %}
+  <label>Number format <select name="decimal"><option value="."{% if analysis.mapping.decimal == '.' %} selected{% endif %}>1,234.56</option><option value=","{% if analysis.mapping.decimal == ',' %} selected{% endif %}>1.234,56</option></select></label>
+  {% if 'date_format' in analysis.ambiguities %}
+  <label>How are dates written? <select name="date_format"><option value="auto">Year first or month written out</option><option value="mdy"{% if analysis.mapping.date_format == 'mdy' %} selected{% endif %}>Month / day / year</option><option value="dmy"{% if analysis.mapping.date_format == 'dmy' %} selected{% endif %}>Day / month / year</option></select></label>
+  {% else %}<input type="hidden" name="date_format" value="{{ analysis.mapping.date_format }}">{% endif %}
+  {% for key, question in [('liability_amount_sign', 'In this file, a card purchase looks like:'), ('liability_balance_sign', 'In this file, money you owe is shown as:')] %}
+    {% if key in analysis.ambiguities %}<label>{{ question }} <select name="{{ key }}" required><option value="">Choose</option><option value="positive">Positive</option><option value="negative">Negative</option></select></label>
+    {% endif %}
+  {% endfor %}
+  {% if 'unsigned_amounts' in analysis.ambiguities %}
+  <p>Every amount in this file is positive, so Orbit can't tell money in from money out.</p>
+  <p>Choose a debit or credit indicator column above, or confirm the amounts below.</p>
+  <label><input type="checkbox" name="amounts_signed"> These amounts are correct as they are</label>
+  {% elif analysis.mapping.get('amounts_signed') %}<input type="hidden" name="amounts_signed" value="on">{% endif %}
+  <p>Save this mapping for files with the same columns, then import.</p>
+  <button class="btn primary" type="submit">Save mapping and import</button>
+</form></section>

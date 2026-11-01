@@ -1,0 +1,9 @@
+services:
+  orbit:
+    build: .
+    restart: unless-stopped
+    env_file: [{path: .env, required: false}]
+    ports:
+      - "${ORBIT_BIND:-127.0.0.1}:${ORBIT_PORT:-8000}:8000"
+    volumes:
+      - ./data:/srv/orbit/data

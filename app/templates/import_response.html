@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}File import · Orbit{% endblock %}
+{% block content %}
+<a class="back" href="/add/import">← Import a file</a>
+<div id="import-panel" aria-live="polite">{% include '_import_panel.html' %}</div>
+{% endblock %}

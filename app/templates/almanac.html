@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Almanac · Orbit{% endblock %}
+{% macro cells(row) %}
+{% for field in fields %}{% set value = row|attr(field) %}<td class="r num{% if field in ['net_worth_change', 'market_gain', 'kept'] %} {{ value|sign }}{% endif %}">{{ value|rate if field == 'savings_rate' else value|money }}</td>{% endfor %}
+{% endmacro %}
+{% block content %}
+<div class="alm-intro"><h1>Almanac</h1>The yearly record. What you had, what came in, what went out, what you kept.</div>
+<a class="csv" href="/export/almanac-records.csv">Export records CSV</a>
+<div class="records">
+  <div><div class="k">All-time high</div><div class="v num">{{ records.all_time_high|money }}</div><div class="w">{{ records.all_time_high_date or '—' }}</div></div>
+  <div><div class="k">Best month</div><div class="v num {{ records.best_month_change|sign }}">{{ records.best_month_change|money }}</div><div class="w">{{ records.best_month or '—' }} · excludes opening balances</div></div>
+  <div><div class="k">Years tracked</div><div class="v num">{{ records.years_tracked or '—' }}</div></div>
+  <div><div class="k">Avg savings rate</div><div class="v num">{{ records.average_savings_rate|rate }}</div></div>
+  {% for milestone in records.milestones %}<div><div class="k">Crossed {{ milestone.threshold|money }}</div><div class="v num">{{ milestone.date }}</div></div>{% endfor %}
+</div>
+<div class="sec"><h3>Years</h3><a class="csv" href="/export/almanac-years.csv">Export years CSV</a>
+<div class="card tscroll"><table>
+  <thead><tr><th>Year</th>{% for header in headers %}<th class="r">{{ 'Net worth Dec 31' if loop.first else header }}</th>{% endfor %}<th>Notes</th></tr></thead>
+  <tbody>{% for row in years %}<tr{% if row.ytd %} class="ytd"{% endif %}><td class="num">{{ row.year }}{% if row.ytd %} <small>YTD</small>{% endif %}</td>{{ cells(row) }}<td>{% with year=row.year, note=row.note %}{% include 'partials/almanac_note.html' %}{% endwith %}</td></tr>
+  {% else %}<tr><td colspan="10">No data yet.</td></tr>{% endfor %}</tbody>
+</table></div></div>
+<div class="sec"><h3>{{ today.year }}, month by month</h3><a class="csv" href="/export/almanac-months.csv">Export months CSV</a>
+<div class="card tscroll"><table>
+  <thead><tr><th>Month</th>{% for header in headers %}<th class="r">{{ 'Rate' if header == 'Savings rate' else header }}</th>{% endfor %}</tr></thead>
+  <tbody>{% for row in months %}<tr><td>{{ row.month }}{% if not row.closed %} <small>Open</small>{% endif %}</td>{{ cells(row) }}</tr>
+  {% else %}<tr><td colspan="9">No data yet.</td></tr>{% endfor %}
+  {% if ytd %}<tr class="tot"><td>Year to date</td>{{ cells(ytd) }}</tr>{% endif %}</tbody>
+</table></div></div>
+<p class="legend">Market gain also holds home value moves. Bank transfers to investments are not contributions, because that money is already in kept. A mortgage payment counts in full as spending, so the part paying down the loan appears in market gain until loan payments are split out. The current month and YTD use the latest balances; missing month-end values show —.</p>
+{% endblock %}

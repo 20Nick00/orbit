@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Trends · Orbit{% endblock %}
+{% block content %}
+<h1>Trends</h1>
+<div class="grid2">
+  <div class="card"><div class="hd"><h2>Income vs. spending</h2><span class="legend"><span><i></i>Income</span><span><i style="background:var(--s2)"></i>Spending</span></span></div><div class="bd"><div class="chartwrap" id="ioChart"><p class="empty">No data yet.</p></div><a class="csv" href="/export/trends-monthly.csv">Export CSV</a></div></div>
+  <div class="card"><div class="hd"><h2>Monthly net worth change</h2></div><div class="bd"><div class="chartwrap" id="nwChgChart"><p class="empty">No data yet.</p></div><a class="csv" href="/export/trends-monthly.csv">Export CSV</a></div></div>
+  <div class="card"><div class="hd"><h2>Spending by category</h2><span class="eyebrow">Last 90 days</span></div><div class="bd"><div class="cats" id="catList">
+    {% for row in categories %}<div class="r"><span>{{ row.category }}</span><span class="num">{{ row.spending|money }}</span><span class="track"><i></i></span></div>{% else %}<p class="empty">No data yet.</p>{% endfor %}
+  </div><a class="csv" href="/export/trends-categories.csv">Export CSV</a></div></div>
+  <div class="card"><div class="hd"><h2>Investments vs. cash</h2><span class="legend"><span><i></i>Investments</span><span><i style="background:var(--s2)"></i>Cash</span></span></div><div class="bd"><div class="chartwrap" id="mixChart"><p class="empty">No data yet.</p></div><a class="csv" href="/export/trends-mix.csv">Export CSV</a></div></div>
+</div>
+<script type="application/json" id="trends-monthly">{{ monthly_json|tojson }}</script>
+<script type="application/json" id="trends-mix">{{ mix_json|tojson }}</script>
+<script type="application/json" id="trends-categories">{{ categories_json|tojson }}</script>
+<script src="{{ url_for('static', path='charts.js').path }}" defer></script>
+<script src="{{ url_for('static', path='trends.js').path }}" defer></script>
+{% endblock %}
