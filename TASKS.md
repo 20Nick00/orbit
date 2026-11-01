@@ -20,7 +20,7 @@
 - [x] Session 7: property valuation
 - [x] Session 8: trends and almanac
 - [ ] Decide whether to split mortgage payments into interest and principal; today the principal shows up as market gain
-- [/] Session 9: package and publish (built and tested; public release waits for Nick's go-ahead)
+- [x] Session 9: package and publish (live at github.com/20Nick00/orbit)
 - [ ] Run the Tailscale steps in the README end to end on a real tailnet
 - [ ] Nick: Confirm whether your payroll provider emails PDFs (enables the mailbox fetcher) or is portal-only (folder drop)
 - [ ] Nick: Create a Plaid dashboard account and request Production access
